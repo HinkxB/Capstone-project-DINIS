@@ -1,0 +1,74 @@
+{
+  "name": "ZambiaIdentitySystem",
+  "version": "3.1.0",
+  "description": "Complete dual-write interface. Backend handles biometrics; chaincode enforces lineage integrity and data anchoring.",
+  "methods": [
+    {
+      "name": "AnchorCitizenRecord",
+      "description": "Anchors the citizen identity and cryptographically verifies parent NRCs exist on-chain.",
+      "params": [
+        { "name": "personId", "schema": { "type": "string" } },
+        { "name": "nrcNumber", "schema": { "type": "string" } },
+        { "name": "fatherNrc", "schema": { "type": "string", "description": "Leave empty string if unknown. If provided, chaincode verifies existence." } },
+        { "name": "motherNrc", "schema": { "type": "string", "description": "Leave empty string if unknown. If provided, chaincode verifies existence." } },
+        { "name": "recordHash", "schema": { "type": "string" } }
+      ],
+      "returns": [
+        { "name": "success", "schema": { "type": "boolean" } }
+      ]
+    },
+    {
+      "name": "AnchorMarriageEvent",
+      "params": [
+        { "name": "marriageId", "schema": { "type": "string" } },
+        { "name": "wifePersonId", "schema": { "type": "string" } },
+        { "name": "husbandPersonId", "schema": { "type": "string" } },
+        { "name": "recordHash", "schema": { "type": "string" } }
+      ],
+      "returns": [ { "name": "success", "schema": { "type": "boolean" } } ]
+    },
+    {
+      "name": "AnchorSecondaryIdentity",
+      "description": "Anchors a secondary profile (e.g., Passport, Tax) to the core Maiden Anchor.",
+      "params": [
+        { "name": "profileId", "schema": { "type": "integer" } },
+        { "name": "personId", "schema": { "type": "string" } },
+        { "name": "systemName", "schema": { "type": "string" } },
+        { "name": "recordHash", "schema": { "type": "string" } }
+      ],
+      "returns": [ { "name": "success", "schema": { "type": "boolean" } } ]
+    },
+    {
+      "name": "VerifyAnchor",
+      "params": [ { "name": "nrcNumber", "schema": { "type": "string" } } ],
+      "returns": [
+        { "name": "isAnchored", "schema": { "type": "boolean" } },
+        { "name": "recordHash", "schema": { "type": "string" } }
+      ]
+    }
+  ],
+  "events": [
+    {
+      "name": "CitizenAnchored",
+      "params": [
+        { "name": "personId", "schema": { "type": "string" } },
+        { "name": "nrcNumber", "schema": { "type": "string" } },
+        { "name": "recordHash", "schema": { "type": "string" } }
+      ]
+    },
+    {
+      "name": "MarriageAnchored",
+      "params": [
+        { "name": "marriageId", "schema": { "type": "string" } },
+        { "name": "recordHash", "schema": { "type": "string" } }
+      ]
+    },
+    {
+      "name": "SecondaryIdentityAnchored",
+      "params": [
+        { "name": "profileId", "schema": { "type": "integer" } },
+        { "name": "personId", "schema": { "type": "string" } }
+      ]
+    }
+  ]
+}
