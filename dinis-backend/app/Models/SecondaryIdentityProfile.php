@@ -7,19 +7,19 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SecondaryIdentityProfile extends Model
 {
-    protected $table = 'secondary_identity_profile';
-    protected $primaryKey = 'profile_id';
+    protected $table = 'secondary_identity_profiles';
 
     protected $fillable = [
-        'person_id', 'system_name', 'displayed_name', 'is_active'
+        'person_id',
+        'identity_type',
+        'document_number',
+        'issue_date',
+        'expiry_date'
     ];
 
-    protected $casts = [
-        'is_active' => 'boolean',
-    ];
-
-    public function citizen(): BelongsTo
+    // This links the passport back to the Person (NRC record)
+    public function person(): BelongsTo
     {
-        return $this->belongsTo(CitizenNrcRecord::class, 'person_id', 'person_id');
+        return $this->belongsTo(Person::class, 'person_id', 'person_id');
     }
 }

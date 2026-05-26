@@ -19,6 +19,7 @@ return [
 
     // In production, NEVER use ['*']. Specify your exact React frontend URLs.
     'allowed_origins' => [
+        'http://localhost:5173',
         env('FRONTEND_URL', 'http://localhost:3000'), 
         'https://enrollment.identity.gov.zm', // Example production domains
         'https://admin.identity.gov.zm'

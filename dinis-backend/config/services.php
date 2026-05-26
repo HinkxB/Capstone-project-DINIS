@@ -13,6 +13,11 @@ return [
     | a conventional file to locate the various service credentials.
     |
     */
+'firefly' => [
+        'base_url' => env('FIREFLY_BASE_URL', 'http://127.0.0.1:5000/api/v1/namespaces/default'),
+        'api_name' => env('FIREFLY_API_NAME', 'zambiaIdentity'),
+    ],
+
 
     'postmark' => [
         'key' => env('POSTMARK_API_KEY'),
@@ -35,4 +40,7 @@ return [
         ],
     ],
 
+
+
 ];
+

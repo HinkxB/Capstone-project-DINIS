@@ -1,27 +1,35 @@
+<?php
+
 namespace App\DTOs\Person;
+
+use Carbon\Carbon;
 
 class RegisterPersonDTO
 {
     public function __construct(
-        public readonly string $firstName,
-        public readonly string $lastName,
-        public readonly string $dateOfBirth,
-        public readonly string $sexAtBirth,
-        public readonly int $birthCountryId,
-        public readonly ?int $placeOfBirthLocationId = null,
-        public readonly ?string $middleName = null,
+        public readonly string $nrcNumber,
+        public readonly string $maidenFullName,
+        public readonly Carbon $dateOfBirth,
+        public readonly string $sex,
+        public readonly int $villageId,
+        public readonly int $chiefdomId,
+        public readonly ?string $fatherBirthPlace = null,
+        public readonly ?string $motherBirthPlace = null,
+        public readonly ?string $specialMarks = null,
     ) {}
 
-    public static function fromRequest(array $validatedData): self
+    public static function fromRequest(array $data): self
     {
         return new self(
-            firstName: $validatedData['first_name'],
-            lastName: $validatedData['last_name'],
-            dateOfBirth: $validatedData['date_of_birth'],
-            sexAtBirth: $validatedData['sex_at_birth'],
-            birthCountryId: $validatedData['birth_country_id'],
-            placeOfBirthLocationId: $validatedData['place_of_birth_location_id'] ?? null,
-            middleName: $validatedData['middle_name'] ?? null,
+            nrcNumber: $data['nrc_number'],
+            maidenFullName: $data['maiden_full_name'],
+            dateOfBirth: Carbon::parse($data['date_of_birth']),
+            sex: $data['sex'],
+            villageId: (int) $data['village_id'],
+            chiefdomId: (int) $data['chiefdom_id'],
+            fatherBirthPlace: $data['father_birth_place'] ?? null,
+            motherBirthPlace: $data['mother_birth_place'] ?? null,
+            specialMarks: $data['special_marks'] ?? null,
         );
     }
 }
