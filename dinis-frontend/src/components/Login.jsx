@@ -17,6 +17,8 @@ const Login = ({ onLoginSuccess }) => {
             const response = await api.post('/login', { username, password });
             if (response.data?.token) {
                 localStorage.setItem('token', response.data.token);
+                // ADD THIS LINE to save the user data for Role-Based Access:
+                localStorage.setItem('user', JSON.stringify(response.data.user)); 
                 onLoginSuccess();
             }
         } catch (error) {

@@ -1,92 +1,102 @@
 import { useState } from 'react';
+import { Search, User, MapPin, Calendar,  } from 'lucide-react';
 import api from '../api';
-import { Search, User as UserIcon, FileCheck } from 'lucide-react';
 
 const IdentityLookup = () => {
-    const [nrc, setNrc] = useState('');
-    const [citizen, setCitizen] = useState(null);
+    const [searchNrc, setSearchNrc] = useState('');
+    const [citizenData, setCitizenData] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
 
-    const handleSearch = async () => {
-        if (!nrc) return;
-        setLoading(true);
+    const handleSearch = async (e) => {
+        e.preventDefault();
+        if (!searchNrc) return;
+
+        setIsLoading(true);
         setError('');
+        setCitizenData(null);
+
         try {
-            const response = await api.get(`/citizens/${nrc}`);
-            setCitizen(response.data?.data || response.data);
-        } catch (error) {
-            console.error("Lookup Error:", error);
-            setError('NRC Registry: Record not found.');
-            setCitizen(null);
+            const response = await api.get(`/identity/${encodeURIComponent(searchNrc)}`);
+            setCitizenData(response.data.data);
+        } catch (err) {
+            setError(err.response?.data?.message || 'Record not found.');
         } finally {
-            setLoading(false);
+            setIsLoading(false);
         }
     };
 
     return (
-        <div className="w-full max-w-5xl mx-auto space-y-6">
-            
-            {/* Search Bar */}
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row gap-4">
-                <div className="relative flex-1">
-                    <Search className="absolute left-4 top-3.5 text-slate-400" size={20} />
-                    <input 
-                        className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-medium"
-                        placeholder="Search NRC (e.g., 123456/78/1)"
-                        value={nrc}
-                        onChange={(e) => setNrc(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                    />
-                </div>
-                <button 
-                    onClick={handleSearch}
-                    disabled={loading}
-                    className="bg-slate-900 text-white px-8 py-3 rounded-xl font-bold hover:bg-black transition-all disabled:bg-slate-400 whitespace-nowrap"
-                >
-                    {loading ? 'Searching...' : 'Verify Identity'}
-                </button>
-            </div>
+        <div className="max-w-3xl mx-auto bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
+            <h2 className="text-2xl font-black text-slate-800 flex items-center gap-2 mb-6">
+                <Search className="text-blue-600" /> Identity Lookup
+            </h2>
 
+            {/* Search Bar */}
+            <form onSubmit={handleSearch} className="flex gap-4 mb-8">
+                <input 
+                    type="text" 
+                    placeholder="Enter NRC (e.g. 123456/78/1)" 
+                    value={searchNrc} 
+                    onChange={(e) => setSearchNrc(e.target.value)}
+                    className="flex-1 p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-lg font-mono"
+                />
+                <button 
+                    type="submit" 
+                    disabled={isLoading}
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-xl transition-all disabled:opacity-50"
+                >
+                    {isLoading ? 'Searching...' : 'Lookup'}
+                </button>
+            </form>
+
+            {/* Error Message */}
             {error && (
-                <div className="bg-red-50 text-red-600 text-center font-semibold py-4 rounded-xl border border-red-100">
+                <div className="bg-red-50 p-4 rounded-xl border border-red-200 text-red-700 font-medium mb-6">
                     {error}
                 </div>
             )}
 
-            {/* Identity Card */}
-            {citizen && citizen.identity_anchor && (
-                <div className="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden animate-in fade-in duration-500">
-                    <div className="bg-blue-800 p-8 text-white">
-                        <div className="flex justify-between items-start">
-                            <div>
-                                <h3 className="text-3xl font-black uppercase tracking-tight">{citizen.identity_anchor.full_name}</h3>
-                                <p className="text-blue-200 font-mono text-lg mt-1">
-                                    NRC: {citizen.identity_anchor.nrc_number}
-                                </p>
-                            </div>
-                            <div className="bg-white/10 p-4 rounded-2xl backdrop-blur-md">
-                                <UserIcon size={40} />
-                            </div>
+            {/* Results Card */}
+            {citizenData && (
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-6">
+                    <div className="flex items-center gap-4 mb-6 pb-6 border-b border-slate-200">
+                        <div className={`w-16 h-16 rounded-full flex items-center justify-center text-white ${citizenData.sex === 'M' ? 'bg-blue-500' : 'bg-pink-500'}`}>
+                            <User size={32} />
+                        </div>
+                        <div>
+                            <h3 className="text-2xl font-black text-slate-800">{citizenData.maiden_full_name}</h3>
+                            <p className="text-lg font-mono text-slate-500">{citizenData.nrc_number}</p>
                         </div>
                     </div>
 
-                    <div className="p-8 grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <div className="space-y-1">
-                            <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Gender</p>
-                            <p className="text-lg font-bold text-slate-800">{citizen.identity_anchor.sex}</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="flex items-center gap-3">
+                            <Calendar className="text-slate-400" />
+                            <div>
+                                <p className="text-xs font-bold text-slate-400 uppercase">Date of Birth</p>
+                                <p className="font-medium text-slate-700">{citizenData.date_of_birth}</p>
+                            </div>
                         </div>
-                        <div className="space-y-1">
-                            <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Date of Birth</p>
-                            <p className="text-lg font-bold text-slate-800">{citizen.identity_anchor.date_of_birth}</p>
+                        <div className="flex items-center gap-3">
+                            <User className="text-slate-400" />
+                            <div>
+                                <p className="text-xs font-bold text-slate-400 uppercase">Sex</p>
+                                <p className="font-medium text-slate-700">{citizenData.sex === 'M' ? 'Male' : 'Female'}</p>
+                            </div>
                         </div>
-                        <div className="space-y-1">
-                            <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Passport Status</p>
-                            <div className="flex items-center gap-2">
-                                <FileCheck className={citizen.linked_documents?.passport ? "text-green-500" : "text-slate-300"} size={18} />
-                                <p className="font-bold text-slate-800">
-                                    {citizen.linked_documents?.passport?.document_number || 'None Linked'}
-                                </p>
+                        <div className="flex items-center gap-3">
+                            <MapPin className="text-slate-400" />
+                            <div>
+                                <p className="text-xs font-bold text-slate-400 uppercase">Chiefdom</p>
+                                <p className="font-medium text-slate-700">{citizenData.chiefdom_name}</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <MapPin className="text-slate-400" />
+                            <div>
+                                <p className="text-xs font-bold text-slate-400 uppercase">Village</p>
+                                <p className="font-medium text-slate-700">{citizenData.village_name}</p>
                             </div>
                         </div>
                     </div>
